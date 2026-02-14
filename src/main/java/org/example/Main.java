@@ -107,6 +107,7 @@ public class Main {
             System.out.println("No tasks found.");
             return;
         }
+        System.out.println("ID | STATUS | TITLE | DESCRIPTION");
         for (Task task : tasks) {
             System.out.println(formatter.format(task));
         }
