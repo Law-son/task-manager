@@ -41,6 +41,15 @@ public class Main {
                 case "list":
                     handleList(service, formatter, arguments);
                     break;
+                case "complete":
+                    handleComplete(service, arguments);
+                    break;
+                case "delete":
+                    handleDelete(service, arguments);
+                    break;
+                case "status":
+                    handleStatus(service);
+                    break;
                 case "exit":
                 case "quit":
                     System.out.println("Goodbye.");
@@ -61,6 +70,9 @@ public class Main {
         System.out.println("Commands:");
         System.out.println("  add <title> | <description>   Add a new task");
         System.out.println("  list [all|open|done]          List tasks");
+        System.out.println("  complete <id>                 Mark a task as done");
+        System.out.println("  delete <id>                   Delete a task");
+        System.out.println("  status                        Show task counts");
         System.out.println("  help                          Show this help");
         System.out.println("  exit                          Quit the app");
     }
@@ -94,6 +106,41 @@ public class Main {
         }
     }
 
+    private static void handleComplete(TaskService service, String arguments) {
+        UUID id = parseId(arguments);
+        if (id == null) {
+            System.out.println("Usage: complete <id>");
+            return;
+        }
+        boolean success = service.completeTask(id);
+        if (success) {
+            LOGGER.info("Completed task " + id);
+            System.out.println("Completed: " + id);
+        } else {
+            System.out.println("Task not found: " + id);
+        }
+    }
+
+    private static void handleDelete(TaskService service, String arguments) {
+        UUID id = parseId(arguments);
+        if (id == null) {
+            System.out.println("Usage: delete <id>");
+            return;
+        }
+        boolean success = service.deleteTask(id);
+        if (success) {
+            LOGGER.info("Deleted task " + id);
+            System.out.println("Deleted: " + id);
+        } else {
+            System.out.println("Task not found: " + id);
+        }
+    }
+
+    private static void handleStatus(TaskService service) {
+        TaskSummary summary = service.getSummary();
+        System.out.println("Total: " + summary.total() + " | Open: " + summary.open() + " | Done: " + summary.done());
+    }
+
     private static TaskRepository createRepository() {
         try {
             return new FileTaskRepository(Paths.get(DATA_FILE));
@@ -114,5 +161,16 @@ public class Main {
             return Optional.of(TaskStatus.DONE);
         }
         return Optional.empty();
+    }
+
+    private static UUID parseId(String arguments) {
+        if (arguments == null || arguments.isEmpty()) {
+            return null;
+        }
+        try {
+            return UUID.fromString(arguments.trim());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }
