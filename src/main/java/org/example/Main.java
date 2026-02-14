@@ -31,32 +31,37 @@ public class Main {
             String command = parts[0].toLowerCase();
             String arguments = parts.length > 1 ? parts[1].trim() : "";
 
-            switch (command) {
-                case "help":
-                    printHelp();
-                    break;
-                case "add":
-                    handleAdd(service, arguments);
-                    break;
-                case "list":
-                    handleList(service, formatter, arguments);
-                    break;
-                case "complete":
-                    handleComplete(service, arguments);
-                    break;
-                case "delete":
-                    handleDelete(service, arguments);
-                    break;
-                case "status":
-                    handleStatus(service);
-                    break;
-                case "exit":
-                case "quit":
-                    System.out.println("Goodbye.");
-                    return;
-                default:
-                    System.out.println("Unknown command. Type 'help' for options.");
-                    break;
+            try {
+                switch (command) {
+                    case "help":
+                        printHelp();
+                        break;
+                    case "add":
+                        handleAdd(service, arguments);
+                        break;
+                    case "list":
+                        handleList(service, formatter, arguments);
+                        break;
+                    case "complete":
+                        handleComplete(service, arguments);
+                        break;
+                    case "delete":
+                        handleDelete(service, arguments);
+                        break;
+                    case "status":
+                        handleStatus(service);
+                        break;
+                    case "exit":
+                    case "quit":
+                        System.out.println("Goodbye.");
+                        return;
+                    default:
+                        System.out.println("Unknown command. Type 'help' for options.");
+                        break;
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Command failed: " + command, e);
+                System.out.println("Error: " + e.getMessage());
             }
         }
     }
