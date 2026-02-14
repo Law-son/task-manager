@@ -1,6 +1,8 @@
 package org.example;
 
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +13,8 @@ public class Main {
 
     public static void main(String[] args) {
         TaskRepository repository = createRepository();
+        TaskService service = new TaskService(repository);
+        TaskFormatter formatter = new TaskFormatter();
         Scanner scanner = new Scanner(System.in);
         printWelcome();
 
@@ -25,10 +29,17 @@ public class Main {
             }
             String[] parts = line.split("\\s+", 2);
             String command = parts[0].toLowerCase();
+            String arguments = parts.length > 1 ? parts[1].trim() : "";
 
             switch (command) {
                 case "help":
                     printHelp();
+                    break;
+                case "add":
+                    handleAdd(service, arguments);
+                    break;
+                case "list":
+                    handleList(service, formatter, arguments);
                     break;
                 case "exit":
                 case "quit":
@@ -48,8 +59,39 @@ public class Main {
 
     private static void printHelp() {
         System.out.println("Commands:");
+        System.out.println("  add <title> | <description>   Add a new task");
+        System.out.println("  list [all|open|done]          List tasks");
         System.out.println("  help                          Show this help");
         System.out.println("  exit                          Quit the app");
+    }
+
+    private static void handleAdd(TaskService service, String arguments) {
+        if (arguments.isEmpty()) {
+            System.out.println("Usage: add <title> | <description>");
+            return;
+        }
+        String[] parts = arguments.split("\\|", 2);
+        String title = parts[0].trim();
+        String description = parts.length > 1 ? parts[1].trim() : "";
+        Task task = service.addTask(title, description);
+        LOGGER.info("Added task " + task.getId());
+        System.out.println("Added: " + task.getId() + " | " + task.getTitle());
+    }
+
+    private static void handleList(TaskService service, TaskFormatter formatter, String arguments) {
+        Optional<TaskStatus> filter = parseStatusFilter(arguments);
+        if (arguments.length() > 0 && filter.isEmpty()) {
+            System.out.println("Usage: list [all|open|done]");
+            return;
+        }
+        List<Task> tasks = service.listTasks(filter);
+        if (tasks.isEmpty()) {
+            System.out.println("No tasks found.");
+            return;
+        }
+        for (Task task : tasks) {
+            System.out.println(formatter.format(task));
+        }
     }
 
     private static TaskRepository createRepository() {
@@ -59,5 +101,18 @@ public class Main {
             LOGGER.log(Level.WARNING, "Falling back to in-memory storage", e);
             return new InMemoryTaskRepository();
         }
+    }
+
+    private static Optional<TaskStatus> parseStatusFilter(String arguments) {
+        if (arguments == null || arguments.isEmpty() || arguments.equalsIgnoreCase("all")) {
+            return Optional.empty();
+        }
+        if (arguments.equalsIgnoreCase("open")) {
+            return Optional.of(TaskStatus.OPEN);
+        }
+        if (arguments.equalsIgnoreCase("done")) {
+            return Optional.of(TaskStatus.DONE);
+        }
+        return Optional.empty();
     }
 }
