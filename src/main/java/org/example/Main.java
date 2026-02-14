@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,7 +98,7 @@ public class Main {
 
     private static void handleList(TaskService service, TaskFormatter formatter, String arguments) {
         Optional<TaskStatus> filter = parseStatusFilter(arguments);
-        if (arguments.length() > 0 && filter.isEmpty()) {
+        if (!arguments.isEmpty() && filter.isEmpty() && !arguments.equalsIgnoreCase("all")) {
             System.out.println("Usage: list [all|open|done]");
             return;
         }
