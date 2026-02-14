@@ -1,17 +1,47 @@
 package org.example;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        Scanner scanner = new Scanner(System.in);
+        printWelcome();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        while (true) {
+            System.out.print("> ");
+            if (!scanner.hasNextLine()) {
+                break;
+            }
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            String[] parts = line.split("\\s+", 2);
+            String command = parts[0].toLowerCase();
+
+            switch (command) {
+                case "help":
+                    printHelp();
+                    break;
+                case "exit":
+                case "quit":
+                    System.out.println("Goodbye.");
+                    return;
+                default:
+                    System.out.println("Unknown command. Type 'help' for options.");
+                    break;
+            }
         }
+    }
+
+    private static void printWelcome() {
+        System.out.println("Task Manager");
+        System.out.println("Type 'help' for a list of commands.");
+    }
+
+    private static void printHelp() {
+        System.out.println("Commands:");
+        System.out.println("  help                          Show this help");
+        System.out.println("  exit                          Quit the app");
     }
 }
